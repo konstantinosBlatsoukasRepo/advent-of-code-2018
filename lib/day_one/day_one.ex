@@ -3,7 +3,7 @@ defmodule FrequenciesReader do
 
   @day_one_input_path "./lib/day_one/day_one_input.txt"
 
-  def read_frequencies() do
+  def read_frequencies do
     case read(@day_one_input_path) do
       {:ok, contents} ->
         contents
@@ -18,9 +18,9 @@ end
 
 defmodule DayOne do
   @frequencies FrequenciesReader.read_frequencies()
-  def calibrate_the_frequency(), do: Enum.sum(@frequencies)
+  def calibrate_the_frequency, do: Enum.sum(@frequencies)
 
-  def first_duplicate_frequency() do
+  def first_duplicate_frequency do
     map_set = MapSet.put(MapSet.new(), 0)
     do_first_duplicate_frequency(@frequencies, map_set, 0)
   end
