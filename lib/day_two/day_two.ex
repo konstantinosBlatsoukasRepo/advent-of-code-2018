@@ -61,4 +61,50 @@ defmodule DayTwo do
       end
     end)
   end
+
+  def find_the_correct_words do
+    [first_id | rest_ids] = AdventOfCode2018.read_input(@day_two_input_path)
+
+    do_find_the_correct_words(first_id, rest_ids)
+  end
+
+  def do_find_the_correct_words(_, []), do: :not_the_one
+
+  def do_find_the_correct_words(first_id, rest_ids) do
+
+    case search_the_boxes(first_id, rest_ids) do
+      :not_found ->
+        [next_id | rest]= rest_ids
+        do_find_the_correct_words(next_id, rest)
+      found -> found
+    end
+
+  end
+
+  def search_the_boxes(_, []), do: :not_found
+
+  def search_the_boxes(word, [other_word | rest]) do
+    case total_diff_chars(word, other_word) do
+      :not_correct -> search_the_boxes(word, rest)
+      :correct -> {:found, word, other_word}
+    end
+  end
+
+  def total_diff_chars(first_word, second_word) do
+    first_word_list = String.to_charlist(first_word)
+    second_word_list = String.to_charlist(second_word)
+
+    do_total_diff_chars(first_word_list, second_word_list, 0)
+  end
+
+  defp do_total_diff_chars(_, _, count) when count > 1, do: :not_correct
+
+  defp do_total_diff_chars([], [], 1), do: :correct
+
+  defp do_total_diff_chars([first_char | first_rest], [second_char | second_rest], count) do
+    case first_char == second_char do
+      true -> do_total_diff_chars(first_rest, second_rest, count)
+      false -> do_total_diff_chars(first_rest, second_rest, count + 1)
+    end
+  end
 end
