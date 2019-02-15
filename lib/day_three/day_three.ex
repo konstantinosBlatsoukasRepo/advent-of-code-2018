@@ -1,9 +1,40 @@
 defmodule DayThree do
+  @claims ClaimsParser.parse_claims()
+  @claims_with_id ClaimsParser.parse_claims_with_id()
+
   def calculate_common_inches do
-    [first_claim | rest] = ClaimsParser.parse_claims()
+    [first_claim | rest] = @claims
 
     common_inches = do_calculate_common_inches(first_claim, rest, MapSet.new(), rest)
     MapSet.size(common_inches)
+  end
+
+  def find_the_claim_that_does_not_intersect do
+    [first_claim | rest] = @claims_with_id
+    do_find(first_claim, rest, [first_claim | rest])
+
+  end
+
+  defp do_find({id, _, _}, [], _), do: id
+
+  defp do_find(current_claim, claims, all_claims) do
+    {id, current_min, current_max} = current_claim
+
+    [{next_id, next_min, next_max} | rest] = claims
+
+
+    IO.inspect(id)
+    IO.inspect(next_id)
+    # if id == "#3 ", do: true
+    if next_id == "#1 ", do: true
+
+    if id == next_id, do: do_find(current_claim, rest, all_claims)
+
+    case claims_intersect?({current_min, current_max}, {next_min, next_max}) do
+      true -> do_find({next_id, next_min, next_max}, all_claims, all_claims)
+      false -> do_find(current_claim, rest, all_claims)
+    end
+
   end
 
   defp do_calculate_common_inches(_, _, map_set, []), do: map_set
