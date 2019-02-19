@@ -10,7 +10,6 @@ defmodule DayFour.Shifts do
     AdventOfCode2018.read_input(@day_four_input_path)
     |> Enum.map(&parse_shift/1)
     |> Enum.sort_by(&{&1.date, &1.hour, &1.minute})
-    |> Enum.each(&Logger.debug(inspect(&1)))
   end
 
   def parse_shift(shift) do
@@ -22,6 +21,7 @@ defmodule DayFour.Shifts do
     case state do
       " wakes up" ->
         state = :wakes_up
+
         %Shift{
           date: date,
           hour: String.to_integer(hour),
@@ -31,6 +31,7 @@ defmodule DayFour.Shifts do
 
       " falls asleep" ->
         state = :falls_asleep
+
         %Shift{
           date: date,
           hour: String.to_integer(hour),
@@ -42,6 +43,7 @@ defmodule DayFour.Shifts do
         {:ok, regex} = @regex
         [id | _] = Regex.run(regex, guard_id)
         state = String.to_integer(id)
+
         %Shift{
           date: date,
           hour: String.to_integer(hour),
@@ -49,7 +51,5 @@ defmodule DayFour.Shifts do
           state: state
         }
     end
-
-
   end
 end
