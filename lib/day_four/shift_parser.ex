@@ -4,12 +4,13 @@ defmodule DayFour.Shifts do
   require Logger
 
   @day_four_input_path "./lib/day_four/day_four_input.txt"
+  # @day_four_input_path "./lib/day_four/test_four.txt"
   @regex Regex.recompile(~r"\d+")
 
   def parse_shifts do
     AdventOfCode2018.read_input(@day_four_input_path)
     |> Enum.map(&parse_shift/1)
-    |> Enum.sort_by(&{&1.date, &1.hour, &1.minute})
+    |> Enum.sort_by(&{&1.date.year, &1.date.month, &1.date.day, &1.hour, &1.minute})
   end
 
   def parse_shift(shift) do

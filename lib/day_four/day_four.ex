@@ -4,6 +4,8 @@ defmodule DayFour do
   def guard_that_sleeps_the_most do
     sleeping_ranges = calculate_sleep_ranges_per_guard()
 
+    calculate_total_sleep_per_guard(sleeping_ranges)
+
     {most_sleepy_guard, _} =
       calculate_total_sleep_per_guard(sleeping_ranges)
       |> calculate_the_most_sleepy_guard
@@ -12,9 +14,6 @@ defmodule DayFour do
       Map.get(sleeping_ranges, most_sleepy_guard)
       |> calculate_the_most_sleepy_minute()
       |> most_sleepy_minute()
-
-      IO.inspect(most_sleepy_guard)
-      IO.inspect(sleepiest_minute)
 
     sleepiest_minute * most_sleepy_guard
   end
@@ -25,6 +24,7 @@ defmodule DayFour do
     [first_event | rest] = shifts_events
 
     first_guard = first_event.state
+
     do_calculate_sleep_ranges_per_guard(Map.new(), rest, first_guard)
   end
 
@@ -51,8 +51,20 @@ defmodule DayFour do
         do_calculate_sleep_ranges_per_guard(events_per_guard, shifts_events, guard)
 
       new_guard_shift ->
-        case Enum.member?(events_per_guard, new_guard_shift) do
+        case Map.has_key?(events_per_guard, new_guard_shift) do
           true ->
+            events_per_guard =
+              add_new_event(
+                events_per_guard,
+                new_guard_shift,
+                shift_event.minute,
+                :new_shift,
+                shift_event.date
+              )
+
+            do_calculate_sleep_ranges_per_guard(events_per_guard, shifts_events, new_guard_shift)
+
+          false ->
             events_per_guard =
               add_new_event(
                 events_per_guard,
@@ -62,9 +74,6 @@ defmodule DayFour do
                 shift_event.date
               )
 
-            do_calculate_sleep_ranges_per_guard(events_per_guard, shifts_events, new_guard_shift)
-
-          false ->
             events_per_guard = Map.put_new(events_per_guard, new_guard_shift, [])
             do_calculate_sleep_ranges_per_guard(events_per_guard, shifts_events, new_guard_shift)
         end
@@ -85,6 +94,12 @@ defmodule DayFour do
     case guards_and_sleeping do
       [] ->
         0
+
+      [{:new_shift, _, _} | rest_shifts] ->
+        guard_total_sleep_time(rest_shifts)
+
+      [{:first_shift, _, _} | rest_shifts] ->
+        0 + guard_total_sleep_time(rest_shifts)
 
       [wake_up_minute | [fall_asleep_minute | rest_shifts]] ->
         {:wakes_up, wake_minute, _} = wake_up_minute
@@ -121,6 +136,12 @@ defmodule DayFour do
 
   def do_calculate_the_most_sleepy_minute([], minutes_map), do: minutes_map
 
+  def do_calculate_the_most_sleepy_minute([{:new_shift, _, _} | rest], minutes_map),
+    do: do_calculate_the_most_sleepy_minute(rest, minutes_map)
+
+  def do_calculate_the_most_sleepy_minute([{:first_shift, _, _} | rest], minutes_map),
+    do: do_calculate_the_most_sleepy_minute(rest, minutes_map)
+
   def do_calculate_the_most_sleepy_minute([head | rest], minutes_map) do
     {:wakes_up, upper_bound, _} = head
     upper_bound = upper_bound - 1
@@ -148,5 +169,4 @@ defmodule DayFour do
       end
     end)
   end
-
 end
