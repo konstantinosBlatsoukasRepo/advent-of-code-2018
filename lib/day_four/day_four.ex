@@ -1,10 +1,9 @@
 defmodule DayFour do
   alias DayFour.Shifts
 
+  # part_one
   def guard_that_sleeps_the_most do
     sleeping_ranges = calculate_sleep_ranges_per_guard()
-
-    calculate_total_sleep_per_guard(sleeping_ranges)
 
     {most_sleepy_guard, _} =
       calculate_total_sleep_per_guard(sleeping_ranges)
@@ -12,10 +11,56 @@ defmodule DayFour do
 
     {sleepiest_minute, _} =
       Map.get(sleeping_ranges, most_sleepy_guard)
-      |> calculate_the_most_sleepy_minute()
+      |> calculate_sleep_frequency()
       |> most_sleepy_minute()
 
     sleepiest_minute * most_sleepy_guard
+  end
+
+  # part_two
+  def most_frequent_minute_tha_a_guard_was_asleep() do
+    calculate_sleep_frequencies_per_guard()
+    |> Enum.reduce({0, 0, 0}, fn
+      {current_guard_id, frequency_map}, {max_guard_id, max_frequency, max_minute} ->
+        change_max_if_greater(
+          {max_guard_id, max_frequency, max_minute},
+          {current_guard_id, frequency_map}
+        )
+    end)
+  end
+
+  defp change_max_if_greater(
+         {max_guard_id, max_frequency, max_minute},
+         {current_guard_id, current_frequency_map}
+       ) do
+    Enum.reduce(
+      current_frequency_map,
+      {max_guard_id, max_frequency, max_minute},
+      fn {current_minute, current_frequency}, {max_guard_id, max_frequency, max_minute} ->
+        if current_frequency > max_frequency do
+          {current_guard_id, current_frequency, current_minute}
+        else
+          {max_guard_id, max_frequency, max_minute}
+        end
+      end
+    )
+  end
+
+  def calculate_sleep_frequencies_per_guard() do
+    sleeping_ranges = calculate_sleep_ranges_per_guard()
+
+    guads_ids =
+      sleeping_ranges
+      |> Map.keys()
+
+    Enum.reduce(guads_ids, %{}, fn
+      guard_id, sleep_frequencies_per_guard ->
+        asleep_frequency =
+          Map.get(sleeping_ranges, guard_id)
+          |> calculate_sleep_frequency()
+
+        Map.put(sleep_frequencies_per_guard, guard_id, asleep_frequency)
+    end)
   end
 
   def calculate_sleep_ranges_per_guard do
@@ -126,23 +171,23 @@ defmodule DayFour do
     end)
   end
 
-  def calculate_the_most_sleepy_minute(ranges_of_most_sleepy) do
+  def calculate_sleep_frequency(ranges_of_most_sleepy) do
     minutes_map =
       Enum.map(0..59, fn x -> x end)
       |> Enum.reduce(%{}, fn k, acc -> Map.put(acc, k, 0) end)
 
-    do_calculate_the_most_sleepy_minute(ranges_of_most_sleepy, minutes_map)
+    do_calculate_sleep_frequency(ranges_of_most_sleepy, minutes_map)
   end
 
-  def do_calculate_the_most_sleepy_minute([], minutes_map), do: minutes_map
+  def do_calculate_sleep_frequency([], minutes_map), do: minutes_map
 
-  def do_calculate_the_most_sleepy_minute([{:new_shift, _, _} | rest], minutes_map),
-    do: do_calculate_the_most_sleepy_minute(rest, minutes_map)
+  def do_calculate_sleep_frequency([{:new_shift, _, _} | rest], minutes_map),
+    do: do_calculate_sleep_frequency(rest, minutes_map)
 
-  def do_calculate_the_most_sleepy_minute([{:first_shift, _, _} | rest], minutes_map),
-    do: do_calculate_the_most_sleepy_minute(rest, minutes_map)
+  def do_calculate_sleep_frequency([{:first_shift, _, _} | rest], minutes_map),
+    do: do_calculate_sleep_frequency(rest, minutes_map)
 
-  def do_calculate_the_most_sleepy_minute([head | rest], minutes_map) do
+  def do_calculate_sleep_frequency([head | rest], minutes_map) do
     {:wakes_up, upper_bound, _} = head
     upper_bound = upper_bound - 1
 
@@ -158,7 +203,7 @@ defmodule DayFour do
         fresh_map
       end)
 
-    do_calculate_the_most_sleepy_minute(rest_of_the_rest, minutes_map)
+    do_calculate_sleep_frequency(rest_of_the_rest, minutes_map)
   end
 
   def most_sleepy_minute(asleep_minutes_frequency) do
