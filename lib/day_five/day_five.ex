@@ -24,6 +24,7 @@ defmodule DayFive do
     end)
   end
 
+  # part 1
   def count_units_after_reactions() do
     {:ok, input} = File.read(@day_five_input_path)
 
@@ -33,7 +34,6 @@ defmodule DayFive do
       true -> do_count_units_after_reactions(true, input, reaction_combos)
       false -> do_count_units_after_reactions(false, input, reaction_combos)
     end
-
   end
 
   def do_count_units_after_reactions(false, result, _), do: String.length(result)
@@ -73,4 +73,21 @@ defmodule DayFive do
   end
 
   def remove_reaction(result, _), do: result
+
+  # part 2
+  def remove_chars_combo(_, ""), do: ""
+
+  def remove_chars_combo({lower_char, upper_char}, <<first, rest::binary>>) do
+    case char_matches?({lower_char, upper_char}, first) do
+      true ->
+        remove_chars_combo({lower_char, upper_char}, <<rest::binary>>)
+
+      false ->
+        to_string([first]) <> remove_chars_combo({lower_char, upper_char}, <<rest::binary>>)
+    end
+  end
+
+  def char_matches?({lower_char, upper_char}, first) do
+    lower_char == [first] or upper_char == [first]
+  end
 end
