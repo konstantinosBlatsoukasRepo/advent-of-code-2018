@@ -5,30 +5,35 @@ defmodule DayFive do
   @upper_case_chars Enum.map(65..90, & &1)
 
   def generate_lower_upper_combos() do
-    lower_upper_combo =
-      Enum.zip(@lower_case_chars, @upper_case_chars)
-      |> Enum.reduce(MapSet.new(), fn {a, b}, set_combos ->
-        MapSet.put(set_combos, to_string([a, b]))
-      end)
-
-    upper_lower_combo =
-      Enum.zip(@lower_case_chars, @upper_case_chars)
-      |> Enum.reduce(MapSet.new(), fn {a, b}, set_combos ->
-        MapSet.put(set_combos, to_string([b, a]))
-      end)
-
-    Enum.zip(lower_upper_combo, upper_lower_combo)
-    |> Enum.reduce(MapSet.new(), fn {first_combo, second_combo}, combos ->
-      MapSet.put(combos, first_combo)
-      |> MapSet.put(second_combo)
+    Enum.zip(@lower_case_chars, @upper_case_chars)
+    |> Enum.reduce(MapSet.new(), fn {a, b}, set_combos ->
+      MapSet.put(set_combos, to_string([a, b]))
     end)
   end
 
-  # part 1
-  def count_units_after_reactions() do
-    {:ok, input} = File.read(@day_five_input_path)
+  def generate_upper_lower_combos() do
+    Enum.zip(@lower_case_chars, @upper_case_chars)
+    |> Enum.reduce(MapSet.new(), fn {a, b}, set_combos ->
+      MapSet.put(set_combos, to_string([b, a]))
+    end)
+  end
 
-    reaction_combos = generate_lower_upper_combos()
+  def generate_combos() do
+    lower_upper_combos = generate_lower_upper_combos()
+
+    upper_lower_combos = generate_upper_lower_combos()
+
+    MapSet.union(lower_upper_combos, upper_lower_combos)
+  end
+
+  # part 1
+  def part_one() do
+    {:ok, input} = File.read(@day_five_input_path)
+    count_units_after_reactions(input)
+  end
+
+  def count_units_after_reactions(input) do
+    reaction_combos = generate_combos()
 
     case has_reaction?(input, reaction_combos) do
       true -> do_count_units_after_reactions(true, input, reaction_combos)
@@ -75,6 +80,25 @@ defmodule DayFive do
   def remove_reaction(result, _), do: result
 
   # part 2
+  def part_two() do
+    {:ok, input} = File.read(@day_five_input_path)
+    calculate_the_most_problematic_unit(input)
+  end
+
+  def calculate_the_most_problematic_unit(input) do
+    MapSet.to_list(generate_lower_upper_combos())
+    |> Enum.map(fn x ->
+      <<lower_char, upper_case>> = x
+      do_calculate_the_most_problematic_unit({[lower_char], [upper_case]}, input)
+    end)
+    |> Enum.min()
+  end
+
+  def do_calculate_the_most_problematic_unit({lower_char, upper_char}, polymer) do
+    remove_chars_combo({lower_char, upper_char}, polymer)
+    |> count_units_after_reactions()
+  end
+
   def remove_chars_combo(_, ""), do: ""
 
   def remove_chars_combo({lower_char, upper_char}, <<first, rest::binary>>) do
