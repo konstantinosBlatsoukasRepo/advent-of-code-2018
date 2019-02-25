@@ -1,6 +1,6 @@
 defmodule DaySix.Parser do
-  # @day_six_input_path "./lib/day_six/day_six_input.txt"
-  @day_six_input_path "./lib/day_six/test_six.txt"
+  @day_six_input_path "./lib/day_six/day_six_input.txt"
+  # @day_six_input_path "./lib/day_six/test_six.txt"
   alias DaySix.Point
 
   def parse_points() do

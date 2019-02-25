@@ -8,8 +8,6 @@ defmodule DaySix.PartOne.Solution do
 
     {max_column, max_row} = find_max_row_column(parsed_points)
 
-    # calculate_closest_point_from(%Point{column: 8, row: 8}, parsed_points)
-
     points_with_min_distances =
       generate_all_points({max_column, max_row}, parsed_points)
       |> Enum.map(fn point ->
@@ -17,7 +15,26 @@ defmodule DaySix.PartOne.Solution do
         %{{column, row} => calculate_closest_point_from(point, parsed_points)}
       end)
 
-    extract_infinite_points(points_with_min_distances, {max_column, max_row})
+    infinite_points =
+      extract_infinite_points(points_with_min_distances, {max_column, max_row})
+      |> MapSet.new()
+
+    max_area = Enum.filter(points_with_min_distances, fn map ->
+      [{point, _}] = Map.values(map)
+      not MapSet.member?(infinite_points, point)
+    end)
+    |> Enum.reduce(Map.new(), fn map, acc ->
+      [{point, _}] = Map.values(map)
+
+      case Map.get(acc, point) do
+        nil -> Map.put(acc, point, 1)
+        count -> Map.put(acc, point, count + 1)
+      end
+    end)
+    |> Map.values()
+    |> Enum.max
+
+    max_area + 1
   end
 
   def find_max_row_column(points) do
@@ -57,7 +74,7 @@ defmodule DaySix.PartOne.Solution do
         current_distance = manhattan_distance(point, parsed_point)
 
         cond do
-          # current_distance == min_distance -> {".", 0}
+          current_distance == min_distance -> {".", min_distance}
           current_distance < min_distance -> {parsed_point, current_distance}
           true -> {min_point, min_distance}
         end
