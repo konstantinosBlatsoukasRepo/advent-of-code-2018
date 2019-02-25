@@ -19,18 +19,9 @@ defmodule DaySix.PartOne.Solution do
       extract_infinite_points(points_with_min_distances, {max_column, max_row})
       |> MapSet.new()
 
-    max_area = Enum.filter(points_with_min_distances, fn map ->
-      [{point, _}] = Map.values(map)
-      not MapSet.member?(infinite_points, point)
-    end)
-    |> Enum.reduce(Map.new(), fn map, acc ->
-      [{point, _}] = Map.values(map)
-
-      case Map.get(acc, point) do
-        nil -> Map.put(acc, point, 1)
-        count -> Map.put(acc, point, count + 1)
-      end
-    end)
+    max_area =
+    filter_points_with_infinite_distance(points_with_min_distances, infinite_points)
+    |> count_area_per_point()
     |> Map.values()
     |> Enum.max
 
@@ -98,6 +89,24 @@ defmodule DaySix.PartOne.Solution do
         true -> MapSet.put(acc, point)
         false -> acc
       end
+    end)
+  end
+
+  def count_area_per_point(points) do
+    Enum.reduce(points, Map.new(), fn map, acc ->
+      [{point, _}] = Map.values(map)
+
+      case Map.get(acc, point) do
+        nil -> Map.put(acc, point, 1)
+        count -> Map.put(acc, point, count + 1)
+      end
+    end)
+  end
+
+  def filter_points_with_infinite_distance(points_with_min_distances, infinite_points) do
+    Enum.filter(points_with_min_distances, fn map ->
+      [{point, _}] = Map.values(map)
+      not MapSet.member?(infinite_points, point)
     end)
   end
 end
