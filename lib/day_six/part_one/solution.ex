@@ -1,9 +1,10 @@
 defmodule DaySix.PartOne.Solution do
   alias DaySix.Point
+  alias DaySix.Parser
 
   def part_one() do
     parsed_points =
-      DaySix.Parser.parse_points()
+      Parser.parse_points()
       |> MapSet.new()
 
     {max_column, max_row} = find_max_row_column(parsed_points)
