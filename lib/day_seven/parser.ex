@@ -1,4 +1,4 @@
-defmodule DaySeven.DaySeven do
+defmodule DaySeven.Parser do
   # @day_seven_input_path "./lib/day_seven/day_seven_input.txt"
   @day_seven_input_path "./lib/day_seven/test_seven.txt"
   @split_list ["Step", "must", "be", "finished", "before", " ", "step", "can", "gin."]
@@ -28,7 +28,7 @@ defmodule DaySeven.DaySeven do
     Enum.reduce(dependency_pairs, %{}, fn {dependent, [depends_on: dependency]}, acc ->
       case Map.get(acc, dependent) do
         nil ->
-          Map.put(acc, dependent, dependency)
+          Map.put(acc, dependent, [dependency])
 
         result ->
           Map.put(acc, dependent, [dependency | result])
