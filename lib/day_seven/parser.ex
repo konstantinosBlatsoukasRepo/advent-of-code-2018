@@ -1,12 +1,12 @@
 defmodule DaySeven.Parser do
-  # @day_seven_input_path "./lib/day_seven/day_seven_input.txt"
-  @day_seven_input_path "./lib/day_seven/test_seven.txt"
+  @day_seven_input_path "./lib/day_seven/day_seven_input.txt"
+  # @day_seven_input_path "./lib/day_seven/test_seven.txt"
   @split_list ["Step", "must", "be", "finished", "before", " ", "step", "can", "gin."]
 
   def parse() do
     {:ok, input} = File.read(@day_seven_input_path)
 
-    String.split(input, "\r\n")
+    String.split(input, "\n")
     |> Stream.flat_map(fn line -> String.split(line, @split_list) end)
     |> Enum.filter(&(&1 != ""))
     |> create_dependency_pairs()
