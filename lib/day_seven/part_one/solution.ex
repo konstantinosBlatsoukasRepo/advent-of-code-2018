@@ -2,6 +2,7 @@ defmodule DaySeven.PartOne.Solution do
   alias DaySeven.PartOne.GraphBuilder
   @steps_dependencies DaySeven.Parser.parse()
   @graph GraphBuilder.build_steps_graph()
+
   def part_one() do
     [first_completed | rest] =
       calculate_the_starting_steps()
@@ -24,18 +25,12 @@ defmodule DaySeven.PartOne.Solution do
         [next_completed_step | completed_steps]
 
       _ ->
-        case next_completed_step do
-          :next_not_found ->
-            completed_steps
+        available_steps = Enum.reject(available_steps, &(&1 == next_completed_step))
+        available_steps = sorted_adjacents_to_step(next_completed_step, available_steps)
 
-          _ ->
-            available_steps = Enum.reject(available_steps, &(&1 == next_completed_step))
-            available_steps = sorted_adjacents_to_step(next_completed_step, available_steps)
+        completed_steps = [next_completed_step | completed_steps]
 
-            completed_steps = [next_completed_step | completed_steps]
-
-            do_part_one(available_steps, completed_steps)
-        end
+        do_part_one(available_steps, completed_steps)
     end
   end
 
