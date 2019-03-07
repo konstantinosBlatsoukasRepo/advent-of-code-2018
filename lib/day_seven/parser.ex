@@ -6,7 +6,7 @@ defmodule DaySeven.Parser do
   def parse() do
     {:ok, input} = File.read(@day_seven_input_path)
 
-    String.split(input, "\n")
+    String.split(input, "\r\n")
     |> Stream.flat_map(fn line -> String.split(line, @split_list) end)
     |> Enum.filter(&(&1 != ""))
     |> create_dependency_pairs()

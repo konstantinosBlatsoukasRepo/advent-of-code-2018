@@ -1,8 +1,7 @@
 defmodule DaySeven.PartTwo.CostsCalculator do
   @last_step_additional_cost 25
-  @first_step_cost 1
-  # @first_step_cost 60
-
+  # @first_step_cost 1
+  @first_step_cost 60
 
   def initialize_steps_costs() do
     last_step_cost = @first_step_cost + @last_step_additional_cost

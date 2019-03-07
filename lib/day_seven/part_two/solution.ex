@@ -1,28 +1,43 @@
 defmodule DaySeven.PartTwo.Solution do
-  alias DaySeven.PartOne.GraphBuilder
   alias DaySeven.PartOne.Solution, as: PartOne
-
   alias DaySeven.PartTwo.CostsCalculator
 
-  @graph GraphBuilder.build_steps_graph()
   @initial_steps_costs CostsCalculator.initialize_steps_costs()
-  @total_workers 2
+  @total_workers 5
 
   def part_two() do
     available = PartOne.calculate_the_starting_steps()
-    do_part_two(available, [], 0, @initial_steps_costs)
+    do_part_two(available, [],  @initial_steps_costs, 0)
   end
 
-  def do_part_two(available, completed, total_completed, current_costs) do
+  def do_part_two([], _, _, total_duration) , do: total_duration
+  def do_part_two(available, completed, current_costs, total_duration) do
     steps_for_reduction = Enum.take(available, @total_workers)
+
+    IO.inspect(steps_for_reduction: steps_for_reduction)
 
     updated_costs = decrease_work_amount(steps_for_reduction, current_costs)
 
-    completed_steps = extract_completed_steps(updated_costs)
+    next_completed_steps = extract_completed_steps(updated_costs)
 
-    total_completed = length(completed_steps)
+    case next_completed_steps do
+      [] ->
+        do_part_two(available, completed, updated_costs, total_duration + 1)
 
+      more_steps ->
+        next_completed_steps = more_steps ++ completed
 
+        extra_steps = Enum.flat_map(more_steps, &PartOne.sorted_adjacents_to_step(&1, completed))
+
+        available = available ++ extra_steps
+
+        updated_costs = remove_from_steps_costs(more_steps, updated_costs)
+
+        available = Enum.reject(available, &Enum.member?(next_completed_steps, &1))
+        |> Enum.filter(&PartOne.all_dependecies_completed?(&1, next_completed_steps))
+
+        do_part_two(available, next_completed_steps, updated_costs, total_duration + 1)
+    end
   end
 
   def decrease_work_amount([], current_costs), do: current_costs
@@ -45,5 +60,15 @@ defmodule DaySeven.PartTwo.Solution do
       end
     end)
     |> Enum.sort()
+  end
+
+  def remove_from_steps_costs([], updated_costs), do: updated_costs
+
+  def remove_from_steps_costs(more_steps, updated_costs) do
+    [current_step | rest] = more_steps
+
+    updated_costs = Map.delete(updated_costs, current_step)
+
+    remove_from_steps_costs(rest, updated_costs)
   end
 end
