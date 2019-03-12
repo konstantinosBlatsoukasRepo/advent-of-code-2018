@@ -3,8 +3,7 @@ defmodule DayEight.PartOne.Solution do
 
   def part_one() do
     do_part_one(@parsed_input)
-    |> calculate_sum()
-    |> Enum.flat_map(& &1)
+    |> List.flatten()
     |> Enum.sum()
   end
 
@@ -46,27 +45,22 @@ defmodule DayEight.PartOne.Solution do
                 []
 
               false ->
-                case Enum.all?(candidate_childs, &is_list(&1)) do
+                case node_complete?(candidate_childs) do
                   true ->
                     rest = Enum.drop(rest, interest_length_area)
+
                     [reduce_complete_node(node, interest_length_area) | listify(rest)]
 
                   false ->
-                    lists_if_any = Enum.take(rest, total_node_childs) |> Enum.filter(&is_list(&1))
+                    next_rest = compute_next_rest(rest, total_node_childs)
 
-                    lists_removed =
-                      Enum.take(rest, total_node_childs) |> Enum.reject(&is_list(&1))
-
-                    next_rest = lists_removed ++ Enum.drop(rest, total_node_childs)
+                    lists_if_any = keep_lists(rest, total_node_childs)
 
                     case Enum.empty?(lists_if_any) do
                       true ->
-                        IO.inspect(true_node: node)
                         [total_node_childs | [total_node_metadata | listify(next_rest)]]
 
                       false ->
-                        IO.inspect(node: node)
-
                         [
                           total_node_childs
                           | [total_node_metadata | [lists_if_any | listify(next_rest)]]
@@ -91,24 +85,13 @@ defmodule DayEight.PartOne.Solution do
     childs ++ metadata
   end
 
-  def calculate_sum(listified_input) do
-    do_calculate_sum(listified_input, [])
+  def compute_next_rest(rest, total_node_childs) do
+    Enum.take(rest, total_node_childs)
+    |> Enum.reject(&is_list(&1))
+    |> Enum.concat(Enum.drop(rest, total_node_childs))
   end
 
-  def do_calculate_sum([], result), do: result
+  def node_complete?(candidate_childs), do: Enum.all?(candidate_childs, &is_list(&1))
 
-  def do_calculate_sum(listified_input, result) do
-    numbers = Enum.filter(listified_input, &is_number/1)
-
-    case numbers do
-      [] ->
-        listified_input
-        |> Enum.flat_map(& &1)
-        |> do_calculate_sum(result)
-
-      _ ->
-        Enum.reject(listified_input, &is_number/1)
-        |> do_calculate_sum([numbers | result])
-    end
-  end
+  def keep_lists(rest, total_node_childs), do: Enum.take(rest, total_node_childs) |> Enum.filter(&is_list(&1))
 end
