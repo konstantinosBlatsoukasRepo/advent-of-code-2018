@@ -93,5 +93,6 @@ defmodule DayEight.PartOne.Solution do
 
   def node_complete?(candidate_childs), do: Enum.all?(candidate_childs, &is_list(&1))
 
-  def keep_lists(rest, total_node_childs), do: Enum.take(rest, total_node_childs) |> Enum.filter(&is_list(&1))
+  def keep_lists(rest, total_node_childs),
+    do: Enum.take(rest, total_node_childs) |> Enum.filter(&is_list(&1))
 end
